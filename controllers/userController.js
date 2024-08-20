@@ -10,11 +10,14 @@ const getUsers = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-    const { name, email } = req.body;
+    const { name, email, password } = req.body;
+    if (!name ||!email ||!password) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
     try {
         const result = await pool.query(
-            'INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *',
-            [name, email]
+            'INSERT INTO users (name, email, password) VALUES ($1, $2) RETURNING *',
+            [name, email, password]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
