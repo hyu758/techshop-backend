@@ -1,0 +1,29 @@
+{
+  "name": "techshop-backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hyu758/techshop-backend.git"
+  },
+  "keywords": [
+    "techshop",
+    "be",
+    "api"
+  ],
+  "author": "hyu758",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hyu758/techshop-backend/issues"
+  },
+  "homepage": "https://github.com/hyu758/techshop-backend#readme",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "pg": "^8.12.0"
+  }
+}
