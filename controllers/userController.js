@@ -9,7 +9,6 @@ const getUsers = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 const createUser = async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
@@ -50,8 +49,66 @@ const loginUser = async (req, res) => {
     }
 };
 
+const updateUser = async (req, res) => {
+    const { id } = req.params; // Lấy id từ URL
+    const { name, email, address, phone_number } = req.body; // Lấy các thông tin từ body của request
+
+    try {
+        // Tạo câu lệnh SQL cập nhật động để chỉ cập nhật các trường không null
+        const updateFields = [];
+        const updateValues = [];
+        let index = 1;
+
+        if (name) {
+            updateFields.push(`name = $${index}`);
+            updateValues.push(name);
+            index++;
+        }
+
+        if (email) {
+            updateFields.push(`email = $${index}`);
+            updateValues.push(email);
+            index++;
+        }
+
+        if (address) {
+            updateFields.push(`address = $${index}`);
+            updateValues.push(address);
+            index++;
+        }
+
+        if (phone_number) {
+            updateFields.push(`phone_number = $${index}`);
+            updateValues.push(phone_number);
+            index++;
+        }
+
+        // Thêm id vào cuối của mảng updateValues
+        updateValues.push(id);
+
+        const query = `
+            UPDATE users 
+            SET ${updateFields.join(', ')}
+            WHERE id = $${index}
+            RETURNING *;
+        `;
+
+        const result = await pool.query(query, updateValues);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 module.exports = {
-    getUsers,
     createUser,
-    loginUser
+    loginUser,
+    updateUser,
+    getUsers,
 };
