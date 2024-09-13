@@ -7,7 +7,7 @@ router.post('/register', userController.createUser);
 router.post('/login', userController.loginUser);
 router.put('/updateUser/:id', userController.updateUser);
 router.get('/getUsers', userController.getUsers);
-
+router.get('/getUserById/:id', userController.getUserById);
 // Product
 router.get('/getAllProducts', productController.getAllProducts);
 router.get('/getProductDetails/:id', productController.getProductDetails);
