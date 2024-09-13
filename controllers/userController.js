@@ -56,8 +56,8 @@ const loginUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
     const { id } = req.params; // Lấy id từ URL
-    const { name, email, address, phone_number } = req.body; // Lấy các thông tin từ body của request
-
+    const { name, address, phone_number } = req.body; // Lấy các thông tin từ body của request
+    console.log(name, address, phone_number)
     try {
         // Tạo câu lệnh SQL cập nhật động để chỉ cập nhật các trường không null
         const updateFields = [];
@@ -67,12 +67,6 @@ const updateUser = async (req, res) => {
         if (name) {
             updateFields.push(`name = $${index}`);
             updateValues.push(name);
-            index++;
-        }
-
-        if (email) {
-            updateFields.push(`email = $${index}`);
-            updateValues.push(email);
             index++;
         }
 
@@ -114,7 +108,7 @@ const getUserById = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const result = await pool.query('SELECT id, name, email, address, phone_number FROM users WHERE id = $1', [id]);
+        const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });
