@@ -1,7 +1,6 @@
 const pool = require('../db');
 const bcrypt = require('bcrypt');
 
-
 const getUsers = async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM users');
@@ -10,6 +9,7 @@ const getUsers = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 const createUser = async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
