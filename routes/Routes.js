@@ -19,5 +19,6 @@ router.put('/updateProduct/:id', productController.updateProduct);
 
 // Order
 router.post('/orderItem', orderItemController.orderItemUseCase);
+router.post('/getOrdersByStatus', orderItemController.getOrderItemByUserAndStatus);
 
 module.exports = router;

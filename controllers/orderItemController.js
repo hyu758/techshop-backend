@@ -11,7 +11,7 @@ const orderItemUseCase = async(req, res) => {
         const newOrder = await pool.query(
             `INSERT INTO orders (user_id, status) 
             VALUES ($1, $2) 
-            RETURNING * `,
+            RETURNING *`,
             [productId, userId, orderStatus.PENDING.toString()]
         );
 
@@ -32,6 +32,29 @@ const orderItemUseCase = async(req, res) => {
     }
 };
 
+const getOrderItemByUserAndStatus = async(req, res) => {
+    const {userId, status} = req.params;
+
+    try{
+        const result = await pool.query(
+            `SELECT * 
+            FROM orders INNER JOIN orderitems ON orders.id = orderitems.order_id
+            WHERE id = $1 AND status = $2`, 
+            [userId, status]);
+
+        if (result.rows.length === 0) {
+            return res.status(400).json({ error: 'Order not found' + userId + ' ' + status});
+        }
+
+        res.status(200).json(result.rows);
+    }
+    catch(error){
+        console.error('Error creating order:', error);
+        res.status(400);
+    }
+}
+
 module.exports = {
-    orderItemUseCase
+    orderItemUseCase,
+    getOrderItemByUserAndStatus
 };
