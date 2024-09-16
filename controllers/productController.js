@@ -89,8 +89,25 @@ async function getProductById(id){
     }
 };
 
+async function getProductsByIdIn(ids) {
+    try {
+        // Xây dựng câu lệnh SQL với số lượng ID động
+        const placeholders = ids.map((_, index) => `$${index + 1}`).join(', ');
+        const query = `SELECT * FROM products WHERE id IN (${placeholders})`;
+
+        // Thực hiện truy vấn với danh sách ID
+        const result = await pool.query(query, ids);
+
+        // Trả về tất cả các sản phẩm tìm thấy
+        return result.rows;
+    } catch (error) {
+        console.error('Error fetching products by IDs:', error);
+        throw error;
+    }
+};
 
 module.exports = {
+    getProductsByIdIn,
     getAllProducts,
     getProductDetails,
     createProduct,

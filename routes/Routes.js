@@ -4,6 +4,7 @@ const userController = require('../controllers/userController');
 const productController = require('../controllers/productController');
 const orderItemController = require('../controllers/orderItemController');
 const cartController = require('../controllers/cartController');
+const paymentController = require('../controllers/paymentController');
 
 // Các route cho user
 router.post('/register', userController.createUser);
@@ -25,6 +26,11 @@ router.get('/getOrdersByStatus/:userId/:status', orderItemController.getOrderIte
 //Cart
 router.post('/addToCart', cartController.addToCart);
 router.get('/getCartByUserId/:userId', cartController.getCart);
-router.post('/updateCart/:userId', cartController.updateCart)
-router.delete('/deleteFromCart/:userId', cartController.deleteFromCart)
+router.post('/updateCart/:userId', cartController.updateCart);
+router.delete('/deleteFromCart/:userId', cartController.deleteFromCart);
+
+//Payment
+router.post('/payment', paymentController.pay);
+router.post('/callback_zalopay', paymentController.callbackZaloPay);
+
 module.exports = router;
