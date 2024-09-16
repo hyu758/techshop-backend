@@ -1,11 +1,11 @@
 const pool = require('../db');
-const getProductById = require("./productController")
+const productController = require("./productController")
 
 const orderItemUseCase = async(req, res) => {
     const { userId, productId, quantity} = req.body;
     
     try {
-        let product = getProductById(productId);
+        let product = await productController.getProductById(productId);
         let price = product.price * quantity * (1-product.discount);
         await pool.query('BEGIN')
         const newOrder = await pool.query(
@@ -28,18 +28,18 @@ const orderItemUseCase = async(req, res) => {
     } catch (error) {
         await pool.query('ROLLBACK');
         console.error('Error creating order:', error);
-        res.status(400);
+        res.status(400).json({ message: 'BAD_REQUEST' +  userId +" "+ productId+" "+ quantity});
     }
 };
 
 const getOrderItemByUserAndStatus = async(req, res) => {
     const {userId, status} = req.params;
-
+    console.log("getOrderItemByUserAndStatus "+ userId + " " + status);
     try{
         const result = await pool.query(
             `SELECT * 
             FROM orders INNER JOIN orderitems ON orders.id = orderitems.order_id
-            WHERE id = $1 AND status = $2`, 
+            WHERE orders.id = $1 AND status = $2`, 
             [userId, status]);
 
         if (result.rows.length === 0) {

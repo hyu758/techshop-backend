@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const productController = require('../controllers/productController');
 const orderItemController = require('../controllers/orderItemController');
+const cartController = require('../controllers/cartController');
 
 // Các route cho user
 router.post('/register', userController.createUser);
@@ -19,6 +20,10 @@ router.put('/updateProduct/:id', productController.updateProduct);
 
 // Order
 router.post('/orderItem', orderItemController.orderItemUseCase);
-router.post('/getOrdersByStatus', orderItemController.getOrderItemByUserAndStatus);
+router.get('/getOrdersByStatus/:userId/:status', orderItemController.getOrderItemByUserAndStatus);
+
+//Cart
+router.post('/addToCart', cartController.addToCart);
+router.get('/getCartByUserId/:userId', cartController.getCart);
 
 module.exports = router;
