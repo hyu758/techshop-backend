@@ -45,8 +45,8 @@ const getCart = async (req, res) => {
 }
 
 const updateCart = async (req, res) => {
-    const {userId} = req.params
-    const {productId, quantity } = req.body;
+    const { userId } = req.params
+    const { productId, quantity } = req.body;
     console.log('update cart', userId, productId, quantity);
     try {
         await pool.query(
@@ -64,8 +64,8 @@ const updateCart = async (req, res) => {
 }
 
 const deleteFromCart = async (req, res) => {
-    const {userId} = req.params
-    const {productId} = req.body
+    const { userId } = req.params;
+    const { productId } = req.body;
     console.log('delete cart', userId, productId);
     try {
         await pool.query(
@@ -75,9 +75,26 @@ const deleteFromCart = async (req, res) => {
         );
         res.status(200).json('Cart delete successfully');
     }
-    catch (error){
+    catch (error) {
         console.log('Error delete from cart', error);
-        res.status(400).json({message : 'BAD REQUEST'});
+        res.status(400).json({ message: 'BAD REQUEST' });
     }
 }
-module.exports = { addToCart, getCart, updateCart, deleteFromCart }
+
+const deleteAllCart = async (req, res) => {
+    try {
+        const {userId} = req.params
+        console.log('DELETE ALL CART', userId)
+        await pool.query(
+            `delete from cart
+            where user_id = $1`,
+            [userId]
+        );
+        res.status(200).json('Cart delete successfully');
+    }
+    catch (error) {
+        console.log('Error delete from cart', error);
+        res.status(400).json({ message: 'BAD REQUEST' });
+    }
+}
+module.exports = { addToCart, getCart, updateCart, deleteFromCart, deleteAllCart}
