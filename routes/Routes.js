@@ -28,6 +28,7 @@ router.post('/addToCart', cartController.addToCart);
 router.get('/getCartByUserId/:userId', cartController.getCart);
 router.post('/updateCart/:userId', cartController.updateCart);
 router.delete('/deleteFromCart/:userId', cartController.deleteFromCart);
+router.delete('/deleteAllCart/:userId', cartController.deleteAllCart);
 
 //Payment
 router.post('/payment', paymentController.pay);
