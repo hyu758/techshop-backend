@@ -1,7 +1,9 @@
 const orderStatus = Object.freeze({
-    ONCART: Symbol('on_cart'),
-    PENDING: Symbol('pending'),
-    SHIPPED: Symbol('shipped'),
-    DELIVERED: Symbol('delivered'),
-    CANCELLED: Symbol('cancelled')
-})
+    ONCART: 'on_cart',
+    PENDING: 'pending',
+    SHIPPED: 'shipped',
+    DELIVERED: 'delivered',
+    CANCELLED: 'cancelled'
+});
+
+module.exports = orderStatus;
