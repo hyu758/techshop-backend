@@ -36,8 +36,9 @@ async function updateOrderStatus(orderId, status) {
 }
 
 const orderItemUseCase = async (req, res) => {
-    const { userId, productIds, quantities } = req.body;
+    const { userId, productIds, quantities, phone, name, address } = req.body;
 
+    // Kiểm tra nếu số lượng và danh sách sản phẩm không khớp
     if (quantities.length !== productIds.length) {
         return res.status(400).json({ message: 'Quantities and productIds length mismatch!' });
     }
@@ -46,7 +47,7 @@ const orderItemUseCase = async (req, res) => {
         // Lấy danh sách sản phẩm theo productIds
         let products = await productController.getProductsByIdIn(productIds);
 
-        // Kiểm tra xem số lượng sản phẩm nhận được có khớp với productIds không
+        // Kiểm tra nếu số lượng sản phẩm trả về từ DB không khớp với productIds
         if (products.length !== productIds.length) {
             return res.status(404).json({ message: 'Some products not found!' });
         }
@@ -61,17 +62,15 @@ const orderItemUseCase = async (req, res) => {
         // Bắt đầu transaction
         await pool.query('BEGIN');
 
-        // Tạo đơn hàng mới
+        // Tạo đơn hàng mới với phone, name, và address
         const newOrderResult = await pool.query(
-            `INSERT INTO orders (user_id, status, total_amount) 
-            VALUES ($1, $2, $3) 
+            `INSERT INTO orders (user_id, status, total_amount, phone, name, address) 
+            VALUES ($1, $2, $3, $4, $5, $6) 
             RETURNING *`,
-            [userId, orderStatus.PENDING, 0]
+            [userId, orderStatus.PENDING, 0, phone, name, address]
         );
         const newOrderId = newOrderResult.rows[0].id;
         console.log(`New Order ID: ${newOrderId}`);
-
-        await pool.query('COMMIT');
 
         // Thêm các mục vào đơn hàng
         const insertOrderItemsPromises = productIds.map((productId, index) => {
@@ -98,6 +97,7 @@ const orderItemUseCase = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
 
 
 const getOrderItemByUserAndStatus = async (req, res) => {
