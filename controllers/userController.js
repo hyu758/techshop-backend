@@ -1,9 +1,22 @@
 const pool = require('../db');
 const bcrypt = require('bcrypt');
 
-const getUsers = async (req, res) => {
+const getUsersInPage = async (req, res) => {
+    const { limit = 10, page = 0 } = req.query;
+
+    const limitNumber = parseInt(limit, 10);
+    const pageNumber = parseInt(page, 10);
+
+    if (isNaN(limitNumber) || limitNumber <= 0) {
+        return res.status(400).json({ error: "Invalid limit value" });
+    }
+    if (isNaN(pageNumber) || pageNumber < 0) {
+        return res.status(400).json({ error: "Invalid page value" });
+    }
+    const offset = pageNumber * limitNumber;
+
     try {
-        const result = await pool.query('SELECT * FROM users');
+        const result = await pool.query('SELECT * FROM users LIMIT $1 OFFSET $2', [limitNumber, offset]);
         res.status(200).json(result.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -141,6 +154,6 @@ module.exports = {
     createUser,
     loginUser,
     updateUser,
-    getUsers,
+    getUsersInPage,
     getUserById
 };
