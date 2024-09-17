@@ -1,15 +1,27 @@
 const pool = require('../db');
 
-const getAllProducts = async(req, res) => {
-    try{
-        const result = await pool.query("Select * from products");
-        res.status(200).json(result.rows);
+const getProductsInPage = async(req, res) => {
+    const { limit = 10, page = 0 } = req.query;
+
+    const limitNumber = parseInt(limit, 10);
+    const pageNumber = parseInt(page, 10);
+
+    if (isNaN(limitNumber) || limitNumber <= 0) {
+        return res.status(400).json({ error: "Invalid limit value" });
     }
-    catch(error) {
-        res.status(500).json({error : error.message});
+    if (isNaN(pageNumber) || pageNumber <= 0) {
+        return res.status(400).json({ error: "Invalid page value" });
+    }
+
+    const offset = pageNumber * limitNumber;
+
+    try {
+        const result = await pool.query("SELECT * FROM products LIMIT $1 OFFSET $2", [limitNumber, offset]);
+        res.status(200).json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
-
 
 const getProductDetails = async (req, res) => {
     const { id } = req.params;
@@ -108,7 +120,7 @@ async function getProductsByIdIn(ids) {
 
 module.exports = {
     getProductsByIdIn,
-    getAllProducts,
+    getProductsInPage,
     getProductDetails,
     createProduct,
     updateProduct,

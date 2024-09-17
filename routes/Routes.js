@@ -14,7 +14,7 @@ router.get('/getUsers', userController.getUsers);
 router.get('/getUserById/:id', userController.getUserById);
 
 // Các route cho product
-router.get('/getAllProducts', productController.getAllProducts);
+router.get('/getProductsInPage', productController.getProductsInPage);
 router.get('/getProductDetails/:id', productController.getProductDetails);
 router.post('/createProduct', productController.createProduct);
 router.put('/updateProduct/:id', productController.updateProduct);

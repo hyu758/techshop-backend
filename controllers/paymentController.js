@@ -52,7 +52,6 @@ async function pay(userId, orderId, amount) {
         order.item;
 
         order.mac = CryptoJS.HmacSHA256(data, process.env.KEY1_ZALOPAY).toString();
-        console.log(order.mac);
 
     try {
         const result = await axios.post(process.env.ENDPOINT_ZALOPAY, null, { params: order });
@@ -71,7 +70,6 @@ const callbackZaloPay = (req, res) => {
         let reqMac = req.body.mac;
 
         let mac = CryptoJS.HmacSHA256(dataStr, process.env.KEY2_ZALOPAY).toString();
-        console.log("mac =", mac);
 
         // kiểm tra callback hợp lệ (đến từ ZaloPay server)
         if (reqMac !== mac) {
