@@ -33,4 +33,7 @@ router.delete('/deleteAllCart/:userId', cartController.deleteAllCart);
 //Payment
 router.post('/callback_zalopay', paymentController.callbackZaloPay);
 
+//Top Customer
+router.get('/topCustomer', orderItemController.getTopCustomer);
+
 module.exports = router;

@@ -120,7 +120,24 @@ const getUserById = async (req, res) => {
     }
 };
 
+async function getUserByIdIn(ids) {
+    try {
+        const placeholders = ids.map((_, index) => `$${index + 1}`).join(', ');
+        const query = `SELECT * FROM users WHERE id IN (${placeholders})`;
+        const result = await pool.query(query, ids);
+
+        if (result.rows.length === 0) {
+            throw new Error('User not found!');
+        }
+
+        return result.rows;
+    } catch (error) {
+        throw new Error('User not found!');
+    }
+};
+
 module.exports = {
+    getUserByIdIn,
     createUser,
     loginUser,
     updateUser,

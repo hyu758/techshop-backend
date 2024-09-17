@@ -9,7 +9,7 @@ const getProductsInPage = async(req, res) => {
     if (isNaN(limitNumber) || limitNumber <= 0) {
         return res.status(400).json({ error: "Invalid limit value" });
     }
-    if (isNaN(pageNumber) || pageNumber <= 0) {
+    if (isNaN(pageNumber) || pageNumber < 0) {
         return res.status(400).json({ error: "Invalid page value" });
     }
 

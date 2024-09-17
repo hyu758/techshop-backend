@@ -71,6 +71,7 @@ const callbackZaloPay = (req, res) => {
 
         let mac = CryptoJS.HmacSHA256(dataStr, process.env.KEY2_ZALOPAY).toString();
 
+        let dataJson = JSON.parse(dataStr, process.env.KEY2_ZALOPAY);
         // kiểm tra callback hợp lệ (đến từ ZaloPay server)
         if (reqMac !== mac) {
             // callback không hợp lệ
@@ -80,7 +81,6 @@ const callbackZaloPay = (req, res) => {
         else {
             // thanh toán thành công
             // merchant cập nhật trạng thái cho đơn hàng
-            let dataJson = JSON.parse(dataStr, process.env.KEY2_ZALOPAY);
             console.log("update order's status = success where app_trans_id =", dataJson["app_trans_id"]);
 
             if (dataJson && dataJson["item"] && dataJson["item"].length > 0) {
