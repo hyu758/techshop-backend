@@ -1,6 +1,7 @@
 const pool = require('../db');
 const productController = require("./productController")
 const orderStatus = require('../enum/orderStatus')
+const paymentController = require('../controllers/paymentController')
 
 async function getOrderItemsByOrderId(id) {
     try {
@@ -54,9 +55,11 @@ const orderItemUseCase = async (req, res) => {
 
         // Tính toán giá cho từng sản phẩm
         let price = [];
+        let amount = 0;
         for (let i = 0; i < products.length; i++) {
             let priceOfItem = (1 - products[i].discount) * products[i].price * quantities[i];
             price.push(priceOfItem);
+            amount += priceOfItem;
         }
 
         // Bắt đầu transaction
@@ -67,11 +70,13 @@ const orderItemUseCase = async (req, res) => {
             `INSERT INTO orders (user_id, status, total_amount, phone, name, address) 
             VALUES ($1, $2, $3, $4, $5, $6) 
             RETURNING *`,
-            [userId, orderStatus.PENDING, 0, phone, name, address]
+            [userId, orderStatus.PENDING, amount, phone, name, address]
         );
         const newOrderId = newOrderResult.rows[0].id;
         console.log(`New Order ID: ${newOrderId}`);
-
+        
+        await pool.query('COMMIT');
+        
         // Thêm các mục vào đơn hàng
         const insertOrderItemsPromises = productIds.map((productId, index) => {
             return pool.query(
@@ -88,8 +93,10 @@ const orderItemUseCase = async (req, res) => {
         // Cam kết transaction
         await pool.query('COMMIT');
 
+        let url = await paymentController.pay(userId, newOrderId, amount);
+
         // Phản hồi thành công
-        res.status(200).json({ message: 'Order created successfully' });
+        res.status(200).json({ orderId: newOrderId, paymentUrl: url });
     } catch (error) {
         // Rollback transaction nếu có lỗi
         await pool.query('ROLLBACK');
@@ -97,8 +104,6 @@ const orderItemUseCase = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
-
-
 
 const getOrderItemByUserAndStatus = async (req, res) => {
     const { userId, status } = req.params;

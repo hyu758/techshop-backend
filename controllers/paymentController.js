@@ -9,8 +9,7 @@ const qs = require('qs');
 const orderStatus = require('../enum/orderStatus');
 const orderItemController = require('./orderItemController');
 
-const pay = async (req, res) => {
-    const { userId, orderId } = req.body;
+async function pay(userId, orderId, amount) {
 
     const embed_data = {
         //sau khi hoàn tất thanh toán sẽ đi vào link này (thường là link web thanh toán thành công của mình)
@@ -28,10 +27,10 @@ const pay = async (req, res) => {
         app_time: Date.now(), // miliseconds
         item: JSON.stringify(items),
         embed_data: JSON.stringify(embed_data),
-        amount: await calculateAmount(orderId),
+        amount: amount,
         //khi thanh toán xong, zalopay server sẽ POST đến url này để thông báo cho server của mình
         //Chú ý: cần dùng ngrok để public url thì Zalopay Server mới call đến được
-        callback_url: 'https://techshop-backend-c7hy.onrender.com/callback_zalopay',
+        callback_url: 'https://techshop-backend-c7hy.onrender.com/api/callback_zalopay',
         description: `Payment for the order #${transID} of user #${userId}`,
         bank_code: '',
     };
@@ -52,15 +51,15 @@ const pay = async (req, res) => {
         '|' +
         order.item;
 
-    console.log(data);
-    order.mac = CryptoJS.HmacSHA256(data, process.env.KEY1_ZALOPAY).toString();
+        order.mac = CryptoJS.HmacSHA256(data, process.env.KEY1_ZALOPAY).toString();
+        console.log(order.mac);
 
     try {
         const result = await axios.post(process.env.ENDPOINT_ZALOPAY, null, { params: order });
 
-        return res.status(200).json(result.data);
+        return result.data.order_url;
     } catch (error) {
-        console.log(error);
+        throw new Error('pay fail!');
     }
 }
 
@@ -91,11 +90,13 @@ const callbackZaloPay = (req, res) => {
                 result.return_code = 1;
                 result.return_message = "OK";
             } else {
+                orderItemController.updateOrderStatus(dataJson["item"][0], orderStatus.CANCELLED);
                 result.return_code = -1;
                 result.return_message = "Invalid data structure";
             }
         }
     } catch (ex) {
+        orderItemController.updateOrderStatus(dataJson["item"][0], orderStatus.CANCELLED);
         result.return_code = 0; // ZaloPay server sẽ callback lại (tối đa 3 lần)
         result.return_message = ex.message;
     }
@@ -103,18 +104,5 @@ const callbackZaloPay = (req, res) => {
     // thông báo kết quả cho ZaloPay server
     res.json(result);
 };
-
-async function calculateAmount(id) {
-    let orderItems = await orderItemController.getOrderItemsByOrderId(id);
-    if (orderItems.length == 0) {
-        return 0;
-    }
-    let result = 0;
-    for (let i = 0; i < orderItems.length; i++) {
-        result += parseFloat(orderItems[i].price);
-        // console.log('i: ' + i + " " + orderItems[i].price);
-    }
-    return result;
-}
 
 module.exports = { pay, callbackZaloPay };
