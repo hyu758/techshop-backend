@@ -51,6 +51,7 @@ async function pay(userId, orderId, amount) {
         '|' +
         order.item;
 
+    console.log(data)
         order.mac = CryptoJS.HmacSHA256(data, process.env.KEY1_ZALOPAY).toString();
 
     try {
@@ -82,7 +83,7 @@ const callbackZaloPay = (req, res) => {
             // thanh toán thành công
             // merchant cập nhật trạng thái cho đơn hàng
             console.log("update order's status = success where app_trans_id =", dataJson["app_trans_id"]);
-
+            console.log(dataJson)
             if (dataJson && dataJson["item"] && dataJson["item"].length > 0) {
                 console.log('THANH CONG')
                 orderItemController.updateOrderStatus(dataJson["item"][0], orderStatus.DELIVERED);
