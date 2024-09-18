@@ -19,24 +19,6 @@ async function getOrderItemsByOrderId(id) {
     }
 };
 
-async function updateOrderStatus(orderId, status) {
-    try {
-        const result = await pool.query(
-            `UPDATE orders 
-            SET status = $2 
-            WHERE id = $1 
-            RETURNING *`,
-            [orderId, status]);
-
-        if (result.rows.length === 0) {
-            throw new Error('Order not found');
-        }
-
-        return result.rows;
-    } catch (error) {
-        throw error;
-    }
-}
 
 const orderItemUseCase = async (req, res) => {
     const { userId, productIds, quantities, phone, name, address } = req.body;
@@ -69,7 +51,7 @@ const orderItemUseCase = async (req, res) => {
 
         // Tạo đơn hàng mới với phone, name, và address
         const newOrderResult = await pool.query(
-            `INSERT INTO orders (user_id, status, total_amount, phone, name, address) 
+            `INSERT INTO orders (user_id, status, total_amount, phone, customer_name, address) 
             VALUES ($1, $2, $3, $4, $5, $6) 
             RETURNING *`,
             [userId, orderStatus.PENDING, amount, phone, name, address]
@@ -122,25 +104,72 @@ const orderItemUseCase = async (req, res) => {
 const getOrderByUser = async (req, res) => {
     const { userId } = req.params;
     console.log("getOrderItemByUser " + userId);
+    
     try {
         const result = await pool.query(
-            `SELECT total_amount, status, phone, orders.name, address, products.name, products.price, products.image_url, products.rating
-            FROM orders INNER JOIN orderitems ON orders.id = orderitems.order_id
-            INNER JOIN products on orderitems.product_id = products.id
-            WHERE orders.user_id = $1`,
-            [userId]);
+            `SELECT 
+            orders.id AS order_id, 
+            orders.total_amount, 
+            orders.status, 
+            orders.phone, 
+            orders.customer_name, 
+            orders.address, 
+            products.name AS product_name, 
+            products.price, 
+            products.image_url, 
+            products.rating, 
+            orderitems.quantity
+            FROM orders 
+            INNER JOIN orderitems ON orders.id = orderitems.order_id
+            INNER JOIN products ON orderitems.product_id = products.id
+            WHERE orders.user_id = $1;`,
+            [userId]
+        );
 
         if (result.rows.length === 0) {
-            return res.status(400).json({ error: 'Order not found' + userId});
+            return res.status(400).json({ error: 'Order not found for user ' + userId });
         }
 
-        res.status(200).json(result.rows);
+        // Gom các sản phẩm theo từng order_id
+        const orders = {};
+        
+        result.rows.forEach(row => {
+            const { order_id, total_amount, status, phone, customer_name, address, product_name, price, image_url, rating, quantity } = row;
+
+            if (!orders[order_id]) {
+                // Nếu order_id chưa tồn tại trong object, khởi tạo một đối tượng mới cho đơn hàng này
+                orders[order_id] = {
+                    order_id,
+                    total_amount,
+                    status,
+                    phone,
+                    customer_name,
+                    address,
+                    products: []
+                };
+            }
+
+            // Thêm sản phẩm vào danh sách sản phẩm của đơn hàng
+            orders[order_id].products.push({
+                product_name,
+                price,
+                image_url,
+                rating,
+                quantity
+            });
+        });
+
+        // Chuyển đổi object thành array
+        const ordersArray = Object.values(orders);
+
+        res.status(200).json(ordersArray);
     }
     catch (error) {
-        console.error('Error creating order:', error);
-        res.status(400);
+        console.error('Error fetching order:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-}
+};
+
 
 const getCustomers = async (req, res) => {
     const { type } = req.params;
@@ -161,6 +190,7 @@ const getCustomers = async (req, res) => {
     try {
         const userIds = []
         const value = []
+        console.log(type)
         if (type == topCustomerType.ORDER_COUNT) {
             const result = await pool.query(
                 `SELECT user_id, COUNT(*) AS order_count
@@ -215,7 +245,6 @@ const getCustomers = async (req, res) => {
 
 module.exports = {
     getCustomers,
-    updateOrderStatus,
     getOrderItemsByOrderId,
     orderItemUseCase,
     getOrderByUser

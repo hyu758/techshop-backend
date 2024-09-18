@@ -1,13 +1,10 @@
 require('dotenv').config();
 
-const pool = require('../db');
 const axios = require('axios').default;
 const CryptoJS = require('crypto-js');
-const bodyParser = require('body-parser');
 const moment = require('moment');
-const qs = require('qs');
 const orderStatus = require('../enum/orderStatus');
-const orderItemController = require('./orderItemController');
+const orderController = require('./orderController')
 
 async function pay(userId, orderId, amount) {
 
@@ -93,12 +90,12 @@ const callbackZaloPay = (req, res) => {
             if (items && items.length > 0) {
                 console.log('THANH CONG');
                 console.log(items[0]);
-                orderItemController.updateOrderStatus(items[0], orderStatus.DELIVERED);
+                orderController.updateOrderStatus(items[0], orderStatus.DELIVERED);
                 result.return_code = 1;
                 result.return_message = "OK";
             } else {
                 console.log('NGU');
-                orderItemController.updateOrderStatus(dataJson["app_trans_id"], orderStatus.CANCELLED);
+                orderController.updateOrderStatus(dataJson["app_trans_id"], orderStatus.CANCELLED);
                 result.return_code = -1;
                 result.return_message = "Invalid data structure";
             }
