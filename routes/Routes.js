@@ -22,7 +22,7 @@ router.get('/getAllProducts', productController.getAllProducts);
 
 // Order
 router.post('/orderItem', orderItemController.orderItemUseCase);
-router.get('/getOrdersByStatus/:userId/:status', orderItemController.getOrderItemByUserAndStatus);
+router.get('/getOrderByUser/:userId', orderItemController.getOrderByUser);
 
 //Cart
 router.post('/addToCart', cartController.addToCart);

@@ -107,15 +107,15 @@ const orderItemUseCase = async (req, res) => {
     }
 };
 
-const getOrderItemByUserAndStatus = async (req, res) => {
-    const { userId, status } = req.params;
-    console.log("getOrderItemByUserAndStatus " + userId + " " + status);
+const getOrderByUser = async (req, res) => {
+    const { userId } = req.params;
+    console.log("getOrderItemByUser " + userId);
     try {
         const result = await pool.query(
             `SELECT * 
             FROM orders INNER JOIN orderitems ON orders.id = orderitems.order_id
-            WHERE orders.user_id = $1 AND status = $2`,
-            [userId, status]);
+            WHERE orders.user_id = $1`,
+            [userId]);
 
         if (result.rows.length === 0) {
             return res.status(400).json({ error: 'Order not found' + userId + ' ' + status });
@@ -205,5 +205,5 @@ module.exports = {
     updateOrderStatus,
     getOrderItemsByOrderId,
     orderItemUseCase,
-    getOrderItemByUserAndStatus
+    getOrderByUser
 };
