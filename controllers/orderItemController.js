@@ -77,8 +77,6 @@ const orderItemUseCase = async (req, res) => {
         const newOrderId = newOrderResult.rows[0].id;
         console.log(`New Order ID: ${newOrderId}`);
 
-        await pool.query('COMMIT');
-
         // Thêm các mục vào đơn hàng
         const insertOrderItemsPromises = productIds.map((productId, index) => {
             return pool.query(
@@ -92,9 +90,21 @@ const orderItemUseCase = async (req, res) => {
         // Chờ tất cả các truy vấn chèn dữ liệu hoàn tất
         await Promise.all(insertOrderItemsPromises);
 
+        // Cập nhật số lượng sản phẩm
+        const updateStockPromises = productIds.map((productId, index) => {
+            return pool.query(
+                'UPDATE products SET stock_quantity = stock_quantity - $1 WHERE id = $2',
+                [quantities[index], productId]
+            );
+        });
+
+        // Chờ tất cả các truy vấn cập nhật hoàn tất
+        await Promise.all(updateStockPromises);
+
         // Cam kết transaction
         await pool.query('COMMIT');
 
+        // Thực hiện thanh toán
         let url = await paymentController.pay(userId, newOrderId, amount);
 
         // Phản hồi thành công
@@ -107,18 +117,20 @@ const orderItemUseCase = async (req, res) => {
     }
 };
 
+
 const getOrderByUser = async (req, res) => {
     const { userId } = req.params;
     console.log("getOrderItemByUser " + userId);
     try {
         const result = await pool.query(
-            `SELECT * 
+            `SELECT total_amount, status, phone, orders.name, address, products.name, products.price, products.image_url, products.rating
             FROM orders INNER JOIN orderitems ON orders.id = orderitems.order_id
+            INNER JOIN products on orderitems.product_id = products.id
             WHERE orders.user_id = $1`,
             [userId]);
 
         if (result.rows.length === 0) {
-            return res.status(400).json({ error: 'Order not found' + userId + ' ' + status });
+            return res.status(400).json({ error: 'Order not found' + userId});
         }
 
         res.status(200).json(result.rows);
@@ -129,8 +141,8 @@ const getOrderByUser = async (req, res) => {
     }
 }
 
-const getTopCustomer = async (req, res) => {
-    const { type } = req.body;
+const getCustomers = async (req, res) => {
+    const { type } = req.params;
     console.log("top customer type: ", type);
 
     const { limit = 10, page = 0 } = req.query;
@@ -201,7 +213,7 @@ const getTopCustomer = async (req, res) => {
 }
 
 module.exports = {
-    getTopCustomer,
+    getCustomers,
     updateOrderStatus,
     getOrderItemsByOrderId,
     orderItemUseCase,

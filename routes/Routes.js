@@ -35,6 +35,7 @@ router.delete('/deleteAllCart/:userId', cartController.deleteAllCart);
 router.post('/callback_zalopay', paymentController.callbackZaloPay);
 
 //Top Customer
-router.get('/topCustomer', orderItemController.getTopCustomer);
+router.get('/getCustomers/:type', orderItemController.getCustomers);
+
 
 module.exports = router;
