@@ -10,7 +10,7 @@ const paymentController = require('../controllers/paymentController');
 router.post('/register', userController.createUser);
 router.post('/login', userController.loginUser);
 router.put('/updateUser/:id', userController.updateUser);
-router.get('/getUsersInPage', userController.getUsersInPage);
+router.get('/getAllUsers', userController.getAllUsers);
 router.get('/getUserById/:id', userController.getUserById);
 
 // Các route cho product
