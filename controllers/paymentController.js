@@ -13,7 +13,7 @@ async function pay(userId, orderId, amount) {
 
     const embed_data = {
         //sau khi hoàn tất thanh toán sẽ đi vào link này (thường là link web thanh toán thành công của mình)
-        redirecturl: '/',
+        redirecturl: 'https://techshopvn.onrender.com',
     };
 
     const items = [];
@@ -70,39 +70,45 @@ const callbackZaloPay = (req, res) => {
         let dataStr = req.body.data;
         let reqMac = req.body.mac;
 
+        // Tính toán MAC để xác minh
         let mac = CryptoJS.HmacSHA256(dataStr, process.env.KEY2_ZALOPAY).toString();
 
-        let dataJson = JSON.parse(dataStr, process.env.KEY2_ZALOPAY);
-        // kiểm tra callback hợp lệ (đến từ ZaloPay server)
+        // Parse dữ liệu từ ZaloPay
+        let dataJson = JSON.parse(dataStr);
+
+        // Kiểm tra nếu MAC hợp lệ
         if (reqMac !== mac) {
-            // callback không hợp lệ
+            // Callback không hợp lệ
             result.return_code = -1;
             result.return_message = "mac not equal";
-        }
-        else {
-            // thanh toán thành công
-            // merchant cập nhật trạng thái cho đơn hàng
+        } else {
+            // Thanh toán thành công, cập nhật trạng thái đơn hàng
             console.log("update order's status = success where app_trans_id =", dataJson["app_trans_id"]);
-            console.log(dataJson)
-            if (dataJson && dataJson["item"] && dataJson["item"].length > 0) {
-                console.log('THANH CONG')
-                orderItemController.updateOrderStatus(dataJson["item"][0], orderStatus.DELIVERED);
+            console.log(dataJson);
+
+            // Chuyển đổi item từ chuỗi thành mảng
+            let items = JSON.parse(dataJson["item"]);
+
+            // Kiểm tra cấu trúc dữ liệu trả về
+            if (items && items.length > 0) {
+                console.log('THANH CONG');
+                console.log(items[0]);
+                orderItemController.updateOrderStatus(items[0], orderStatus.DELIVERED);
                 result.return_code = 1;
                 result.return_message = "OK";
             } else {
-                console.log('NGU')
-                orderItemController.updateOrderStatus(dataJson["item"][0], orderStatus.CANCELLED);
+                console.log('NGU');
+                orderItemController.updateOrderStatus(dataJson["app_trans_id"], orderStatus.CANCELLED);
                 result.return_code = -1;
                 result.return_message = "Invalid data structure";
             }
         }
     } catch (ex) {
-        orderItemController.updateOrderStatus(dataJson["item"][0], orderStatus.CANCELLED);
         result.return_code = 0; // ZaloPay server sẽ callback lại (tối đa 3 lần)
         result.return_message = ex.message;
     }
 
-    // thông báo kết quả cho ZaloPay server
+    // Thông báo kết quả cho ZaloPay server
     res.json(result);
 };
 
