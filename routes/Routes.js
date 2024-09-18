@@ -18,6 +18,7 @@ router.get('/getProductsInPage', productController.getProductsInPage);
 router.get('/getProductDetails/:id', productController.getProductDetails);
 router.post('/createProduct', productController.createProduct);
 router.put('/updateProduct/:id', productController.updateProduct);
+router.get('/getAllProducts', productController.getAllProducts);
 
 // Order
 router.post('/orderItem', orderItemController.orderItemUseCase);
