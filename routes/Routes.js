@@ -19,7 +19,7 @@ router.get('/getProductDetails/:id', productController.getProductDetails);
 router.post('/createProduct', productController.createProduct);
 router.put('/updateProduct/:id', productController.updateProduct);
 router.get('/getAllProducts', productController.getAllProducts);
-
+router.post('/rateProduct', productController.rateProduct)
 // Order
 router.post('/orderItem', orderItemController.orderItemUseCase);
 router.get('/getOrderByUser/:userId', orderItemController.getOrderByUser);
