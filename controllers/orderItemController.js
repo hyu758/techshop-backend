@@ -74,9 +74,10 @@ const orderItemUseCase = async (req, res) => {
             RETURNING *`,
             [userId, orderStatus.PENDING, amount, phone, name, address]
         );
+
         const newOrderId = newOrderResult.rows[0].id;
         console.log(`New Order ID: ${newOrderId}`);
-
+        await pool.query('COMMIT');
         // Thêm các mục vào đơn hàng
         const insertOrderItemsPromises = productIds.map((productId, index) => {
             return pool.query(
@@ -89,7 +90,7 @@ const orderItemUseCase = async (req, res) => {
 
         // Chờ tất cả các truy vấn chèn dữ liệu hoàn tất
         await Promise.all(insertOrderItemsPromises);
-
+        await pool.query('COMMIT');
         // Cập nhật số lượng sản phẩm
         const updateStockPromises = productIds.map((productId, index) => {
             return pool.query(
