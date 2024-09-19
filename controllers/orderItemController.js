@@ -19,9 +19,6 @@ async function getOrderItemsByOrderId(id) {
     }
 };
 
-
-
-
 const orderItemUseCase = async (req, res) => {
     const { userId, productIds, quantities, phone, name, address } = req.body;
 
@@ -165,10 +162,6 @@ const getOrderByUser = async (req, res) => {
     }
 };
 
-
-
-
-
 const getCustomers = async (req, res) => {
     const { type } = req.params;
     console.log("top customer type: ", type);
@@ -263,8 +256,31 @@ async function updateRatingOrderItems(orderId, productId, rating) {
     }
 }
 
+const getOrdersByPage = async(req, res) =>{
+    const { limit = 10, page = 0 } = req.query;
+
+    const limitNumber = parseInt(limit, 10);
+    const pageNumber = parseInt(page, 10);
+
+    if (isNaN(limitNumber) || limitNumber <= 0) {
+        return res.status(400).json({ error: "Invalid limit value" });
+    }
+    if (isNaN(pageNumber) || pageNumber < 0) {
+        return res.status(400).json({ error: "Invalid page value" });
+    }
+
+    const offset = pageNumber * limitNumber;
+
+    try {
+        const result = await pool.query('SELECT * FROM orders LIMIT $1 OFFSET $2 ', [limitNumber, offset]);
+        res.status(200).json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+} 
 
 module.exports = {
+    getOrdersByPage,
     getCustomers,
     getOrderItemsByOrderId,
     orderItemUseCase,

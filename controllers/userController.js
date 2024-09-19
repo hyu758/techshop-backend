@@ -1,9 +1,7 @@
 const pool = require('../db');
 const bcrypt = require('bcrypt');
 
-
 const getAllUsers = async (req, res) => {
-
     try {
         const result = await pool.query('SELECT * FROM users');
         res.status(200).json(result.rows);
@@ -11,6 +9,29 @@ const getAllUsers = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+const getUsersByPage = async (req, res) => {
+    const { limit = 10, page = 0 } = req.query;
+
+    const limitNumber = parseInt(limit, 10);
+    const pageNumber = parseInt(page, 10);
+
+    if (isNaN(limitNumber) || limitNumber <= 0) {
+        return res.status(400).json({ error: "Invalid limit value" });
+    }
+    if (isNaN(pageNumber) || pageNumber < 0) {
+        return res.status(400).json({ error: "Invalid page value" });
+    }
+
+    const offset = pageNumber * limitNumber;
+
+    try {
+        const result = await pool.query('SELECT * FROM users LIMIT $1 OFFSET $2 ', [limitNumber, offset]);
+        res.status(200).json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
 
 const createUser = async (req, res) => {
     const { name, email, password } = req.body;
@@ -138,7 +159,54 @@ async function getUserByIdIn(ids) {
     }
 };
 
+const createAdminAccount = async (req, res) =>{
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const result = await pool.query(
+            'INSERT INTO admin (username, password) VALUES ($1, $2) RETURNING *',
+            [username, hashedPassword]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+const loginAdmin = async(req, res) =>{
+    const { username, password } = req.body;
+    console.log('username:', username);
+    console.log('Password:', password);
+    if (!username || !password) {
+        return res.status(400).json({ error: 'username and password are required' });
+    }
+    try {
+        const result = await pool.query('SELECT * FROM admin WHERE username = $1', [username]);
+        console.log(result)
+        const user = result.rows[0];
+
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        res.status(200).json({ message: 'Login successful', user });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 module.exports = {
+    loginAdmin,
+    createAdminAccount,
+    getUsersByPage,
     getUserByIdIn,
     createUser,
     loginUser,
