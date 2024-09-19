@@ -20,6 +20,8 @@ async function getOrderItemsByOrderId(id) {
 };
 
 
+
+
 const orderItemUseCase = async (req, res) => {
     const { userId, productIds, quantities, phone, name, address } = req.body;
 
@@ -71,19 +73,6 @@ const orderItemUseCase = async (req, res) => {
 
         // Chờ tất cả các truy vấn chèn dữ liệu hoàn tất
         await Promise.all(insertOrderItemsPromises);
-        await pool.query('COMMIT');
-        // Cập nhật số lượng sản phẩm
-        const updateStockPromises = productIds.map((productId, index) => {
-            return pool.query(
-                'UPDATE products SET stock_quantity = stock_quantity - $1 WHERE id = $2',
-                [quantities[index], productId]
-            );
-        });
-
-        // Chờ tất cả các truy vấn cập nhật hoàn tất
-        await Promise.all(updateStockPromises);
-
-        // Cam kết transaction
         await pool.query('COMMIT');
 
         // Thực hiện thanh toán
@@ -273,10 +262,12 @@ async function updateRatingOrderItems(orderId, productId, rating) {
         throw error;
     }
 }
+
+
 module.exports = {
     getCustomers,
     getOrderItemsByOrderId,
     orderItemUseCase,
     getOrderByUser,
-    updateRatingOrderItems
+    updateRatingOrderItems,
 };

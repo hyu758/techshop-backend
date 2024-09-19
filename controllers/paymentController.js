@@ -5,6 +5,7 @@ const CryptoJS = require('crypto-js');
 const moment = require('moment');
 const orderStatus = require('../enum/orderStatus');
 const orderController = require('./orderController')
+const productController = require('./productController')
 
 async function pay(userId, orderId, amount) {
 
@@ -25,8 +26,6 @@ async function pay(userId, orderId, amount) {
         item: JSON.stringify(items),
         embed_data: JSON.stringify(embed_data),
         amount: amount,
-        //khi thanh toán xong, zalopay server sẽ POST đến url này để thông báo cho server của mình
-        //Chú ý: cần dùng ngrok để public url thì Zalopay Server mới call đến được
         callback_url: 'https://techshop-backend-c7hy.onrender.com/api/callback_zalopay',
         description: `Payment for the order #${transID} of user #${userId}`,
         bank_code: '',
@@ -91,6 +90,7 @@ const callbackZaloPay = (req, res) => {
                 console.log('THANH CONG');
                 console.log(items[0]);
                 orderController.updateOrderStatus(items[0], orderStatus.DELIVERED);
+                productController.updateProductStock(items[0]);
                 result.return_code = 1;
                 result.return_message = "OK";
             } else {
