@@ -25,14 +25,17 @@ const rateProduct = async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        const product = productResult.rows[0];
-        const oldRating = product.rating || 0;
-        const ratingCount = product.rating_count || 0;
+        let product = productResult.rows[0];
+        let oldRating = product.rating || 0;
+        let ratingCount = product.rating_count || 0;
 
         // Tính toán rating mới
-        const newRatingCount = ratingCount + 1;
-        const newRating = ((oldRating * ratingCount) + rating) / newRatingCount;
+        let newRatingCount = ratingCount + 1;
+        let totalOldRating = parseInt(oldRating) * parseInt(ratingCount);
+        let totalNewRating = totalOldRating + parseInt(rating);
+        let newRating = totalNewRating / newRatingCount;
 
+        console.log(oldRating + " " + ratingCount + " " + newRatingCount + " " + newRating + " " + rating);
         // Cập nhật sản phẩm với rating mới và rating_count mới
         const updateResult = await pool.query(
             `UPDATE products
