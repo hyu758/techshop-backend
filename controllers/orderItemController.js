@@ -45,7 +45,6 @@ const orderItemUseCase = async (req, res) => {
             price.push(priceOfItem);
             amount += priceOfItem;
         }
-
         // Bắt đầu transaction
         await pool.query('BEGIN');
 

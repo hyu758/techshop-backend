@@ -5,6 +5,7 @@ const productController = require('../controllers/productController');
 const orderItemController = require('../controllers/orderItemController');
 const cartController = require('../controllers/cartController');
 const paymentController = require('../controllers/paymentController');
+const ratingController = require('../controllers/ratingController')
 
 // Các route cho user
 router.post('/register', userController.createUser);
@@ -19,7 +20,6 @@ router.get('/getProductDetails/:id', productController.getProductDetails);
 router.post('/createProduct', productController.createProduct);
 router.put('/updateProduct/:id', productController.updateProduct);
 router.get('/getAllProducts', productController.getAllProducts);
-router.post('/rateProduct', productController.rateProduct)
 // Order
 router.post('/orderItem', orderItemController.orderItemUseCase);
 router.get('/getOrderByUser/:userId', orderItemController.getOrderByUser);
@@ -37,5 +37,6 @@ router.post('/callback_zalopay', paymentController.callbackZaloPay);
 //Top Customer
 router.get('/getCustomers/:type', orderItemController.getCustomers);
 
-
+//Rate
+router.post('/rateProduct', ratingController.rateProduct)
 module.exports = router;

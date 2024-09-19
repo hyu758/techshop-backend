@@ -94,8 +94,7 @@ const callbackZaloPay = (req, res) => {
                 result.return_code = 1;
                 result.return_message = "OK";
             } else {
-                console.log('NGU');
-                orderController.updateOrderStatus(dataJson["app_trans_id"], orderStatus.CANCELLED);
+                orderController.updateOrderStatus(items[0], orderStatus.CANCELLED);
                 result.return_code = -1;
                 result.return_message = "Invalid data structure";
             }

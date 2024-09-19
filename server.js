@@ -57,6 +57,22 @@ app.post('/uploadImage', upload.fields([{name: "img", maxCount: 1}]), async (req
     }
 });
 
+async function updatePendingOrders() {
+    try {
+        await pool.query(
+            `UPDATE orders
+             SET status = 'cancelled'
+             WHERE status = 'pending'
+             AND created_at <= NOW() - INTERVAL '15 minutes';`
+        );
+        console.log('Pending orders updated to canceled');
+    } catch (error) {
+        console.error('Error updating pending orders:', error);
+    }
+}
+updatePendingOrders()
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
