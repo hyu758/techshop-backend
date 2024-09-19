@@ -5,7 +5,7 @@ const CryptoJS = require('crypto-js');
 const moment = require('moment');
 const orderStatus = require('../enum/orderStatus');
 const orderController = require('./orderController')
-const productController = require('./productController')
+const updateStock = require('./updateStock')
 
 async function pay(userId, orderId, amount) {
 
@@ -90,7 +90,7 @@ const callbackZaloPay = (req, res) => {
                 console.log('THANH CONG');
                 console.log(items[0]);
                 orderController.updateOrderStatus(items[0], orderStatus.DELIVERED);
-                productController.updateProductStock(items[0]);
+                updateStock.updateProductStock(items[0]);
                 result.return_code = 1;
                 result.return_message = "OK";
             } else {
