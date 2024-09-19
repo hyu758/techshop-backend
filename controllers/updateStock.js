@@ -4,7 +4,7 @@ async function updateProductStock(orderId) {
     try {
         // Truy vấn để lấy productId và quantity từ orderId
         const result = await pool.query(
-            'SELECT product_id, quantity FROM order_items WHERE order_id = $1',
+            'SELECT product_id, quantity FROM orderitems WHERE order_id = $1',
             [orderId]
         );
 
