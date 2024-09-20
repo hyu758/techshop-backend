@@ -72,7 +72,6 @@ const updateProduct = async (req, res) => {
     const { name, description, price, stock_quantity, category_id, brand, image_url, sold_quantity, rating, rating_count, discount } = req.body;
 
     try {
-
         if (!name || !description || !price || !stock_quantity || !category_id || !brand || !image_url) {
             return res.status(400).json({ message: 'All required fields must be provided' });
         }
@@ -80,7 +79,7 @@ const updateProduct = async (req, res) => {
         const result = await pool.query(
             `UPDATE Products
             SET name = $1, description = $2, price = $3, stock_quantity = $4, category_id = $5, brand = $6, image_url = $7,
-                sold_quantity = $8, rating = $9, rating_count = $10, discount = $11
+                sold_quantity = $8, rating = $9, rating_count = $10, discount = $11, updated_at = CURRENT_TIMESTAMP
             WHERE id = $12 RETURNING *`,
             [name, description, price, stock_quantity, category_id, brand, image_url, sold_quantity, rating, rating_count, discount, id]
         );
@@ -95,6 +94,7 @@ const updateProduct = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 async function getProductById(id){
     try {
@@ -128,7 +128,18 @@ async function getProductsByIdIn(ids) {
 };
 
 
+const getAllCategoryNames = async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT id, name FROM categories`
+        );
 
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Error fetching category names:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
 
 module.exports = {
     getProductsByIdIn,
@@ -138,4 +149,5 @@ module.exports = {
     updateProduct,
     getProductById,
     getAllProducts,
+    getAllCategoryNames
 };

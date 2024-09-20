@@ -26,7 +26,9 @@ const getUsersByPage = async (req, res) => {
     const offset = pageNumber * limitNumber;
 
     try {
+        console.log('Limit:', limitNumber, 'Page:', pageNumber, 'Offset:', offset);
         const result = await pool.query('SELECT * FROM users LIMIT $1 OFFSET $2 ', [limitNumber, offset]);
+        console.log('user in page',page,result.rows)
         res.status(200).json(result.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -80,7 +82,8 @@ const loginUser = async (req, res) => {
 const updateUser = async (req, res) => {
     const { id } = req.params; // Lấy id từ URL
     const { name, address, phone_number } = req.body; // Lấy các thông tin từ body của request
-    console.log(name, address, phone_number)
+    console.log(name, address, phone_number);
+    
     try {
         // Tạo câu lệnh SQL cập nhật động để chỉ cập nhật các trường không null
         const updateFields = [];
@@ -105,6 +108,9 @@ const updateUser = async (req, res) => {
             index++;
         }
 
+        // Cập nhật trường updated_at
+        updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
+
         // Thêm id vào cuối của mảng updateValues
         updateValues.push(id);
 
@@ -120,12 +126,14 @@ const updateUser = async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
-        console.log('Update duoc ne!')
+        
+        console.log('Update duoc ne!');
         res.status(200).json(result.rows[0]);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 const getUserById = async (req, res) => {
     const { id } = req.params;

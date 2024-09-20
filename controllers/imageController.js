@@ -31,4 +31,23 @@ const uploadImage = async (req, res) => {
     }
 };
 
-module.exports = {uploadImage}
+const uploadProductImage = async (req, res) => {
+    try {
+        if (!req.files || !req.files['img'] || req.files['img'].length === 0) {
+            return res.status(400).json({ success: false, message: 'No image file provided' });
+        }
+
+        const img_link = req.files['img'][0].path;  // Lấy đường dẫn ảnh từ Cloudinary
+        console.log(`Image Link: ${img_link}`);
+
+        // Trả về đường dẫn ảnh mà không cập nhật cơ sở dữ liệu
+        res.status(200).json({ success: true, img_link });
+    } catch (error) {
+        console.error('Error uploading product image:', error);
+        res.status(500).json({ success: false, message: 'Something went wrong', error });
+    }
+};
+
+
+
+module.exports = {uploadImage, uploadProductImage}

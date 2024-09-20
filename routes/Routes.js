@@ -47,6 +47,9 @@ router.get('/getCustomers/:type', orderItemController.getCustomers);
 //Rate
 router.post('/rateProduct', ratingController.rateProduct)
 
+//Category
+router.get('/getAllCategoryNames', productController.getAllCategoryNames)
+
 //Image
 // Cấu hình CloudinaryStorage
 const storage = new CloudinaryStorage({
@@ -61,7 +64,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 
 router.post('/uploadImage', upload.fields([{ name: "img", maxCount: 1 }]), imageController.uploadImage);
-
+router.post('/uploadProductImage', upload.fields([{ name: "img", maxCount: 1 }]), imageController.uploadProductImage);
 //admin
 router.post('/createAdminAccount', userController.createAdminAccount);
 router.post('/loginAdmin', userController.loginAdmin);

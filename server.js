@@ -16,7 +16,7 @@ async function updatePendingOrders() {
     try {
         await pool.query(
             `UPDATE orders
-             SET status = 'cancelled'
+             SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
              WHERE status = 'pending'
              AND created_at <= NOW() - INTERVAL '15 minutes';`
         );
