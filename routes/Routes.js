@@ -25,6 +25,7 @@ router.get('/getProductDetails/:id', productController.getProductDetails);
 router.post('/createProduct', productController.createProduct);
 router.put('/updateProduct/:id', productController.updateProduct);
 router.get('/getAllProducts', productController.getAllProducts);
+router.delete('/deleteProductById/:id', productController.deleteProductById);
 
 // Order
 router.post('/orderItem', orderItemController.orderItemUseCase);

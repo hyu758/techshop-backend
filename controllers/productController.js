@@ -141,6 +141,23 @@ const getAllCategoryNames = async (req, res) => {
     }
 };
 
+const deleteProductById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const result = await pool.query('DELETE FROM products WHERE id = $1', [id]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        res.status(200).json({ message: 'Product deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 module.exports = {
     getProductsByIdIn,
     getProductsInPage,
@@ -149,5 +166,6 @@ module.exports = {
     updateProduct,
     getProductById,
     getAllProducts,
-    getAllCategoryNames
+    getAllCategoryNames,
+    deleteProductById
 };
