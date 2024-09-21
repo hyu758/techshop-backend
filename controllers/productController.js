@@ -16,12 +16,16 @@ const getProductsInPage = async(req, res) => {
     const offset = pageNumber * limitNumber;
 
     try {
-        const result = await pool.query("SELECT * FROM products LIMIT $1 OFFSET $2", [limitNumber, offset]);
+        const result = await pool.query(
+            "SELECT * FROM products ORDER BY updated_at DESC LIMIT $1 OFFSET $2", 
+            [limitNumber, offset]
+        );
         res.status(200).json(result.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 const getAllProducts = async(req, res) => {
     try {

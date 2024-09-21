@@ -27,13 +27,20 @@ const getUsersByPage = async (req, res) => {
 
     try {
         console.log('Limit:', limitNumber, 'Page:', pageNumber, 'Offset:', offset);
-        const result = await pool.query('SELECT * FROM users LIMIT $1 OFFSET $2 ', [limitNumber, offset]);
-        console.log('user in page',page,result.rows)
+        
+        // Truy vấn dữ liệu và sắp xếp theo created_at
+        const result = await pool.query(
+            'SELECT * FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+            [limitNumber, offset]
+        );
+
+        console.log('Users on page', page, result.rows);
         res.status(200).json(result.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}
+};
+
 
 const createUser = async (req, res) => {
     const { name, email, password } = req.body;
