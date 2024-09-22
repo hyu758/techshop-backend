@@ -110,8 +110,7 @@ const getOrderByUser = async (req, res) => {
             FROM orders 
             INNER JOIN orderitems ON orders.id = orderitems.order_id
             INNER JOIN products ON orderitems.product_id = products.id
-            WHERE orders.user_id = $1
-            ORDER BY orders.created_at DESC;`,
+            WHERE orders.user_id = $1;`,
             [userId]
         );
 
@@ -153,7 +152,7 @@ const getOrderByUser = async (req, res) => {
 
         // Chuyển đổi object thành array
         const ordersArray = Object.values(orders);
-
+        ordersArray.sort((a, b) => b.order_id - a.order_id);
         // Trả về kết quả dưới dạng JSON
         res.status(200).json(ordersArray);
     }
