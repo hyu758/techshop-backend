@@ -110,7 +110,8 @@ const getOrderByUser = async (req, res) => {
             FROM orders 
             INNER JOIN orderitems ON orders.id = orderitems.order_id
             INNER JOIN products ON orderitems.product_id = products.id
-            WHERE orders.user_id = $1;`,
+            WHERE orders.user_id = $1
+            ORDER BY orders.created_at DESC;`,
             [userId]
         );
 
