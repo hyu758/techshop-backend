@@ -7,6 +7,7 @@ const cartController = require('../controllers/cartController');
 const paymentController = require('../controllers/paymentController');
 const ratingController = require('../controllers/ratingController')
 const imageController = require('../controllers/imageController');
+const categoryController = require('../controllers/categoryController');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('../configs/cloudinary');
 const multer = require('multer');
@@ -18,6 +19,7 @@ router.put('/updateUser/:id', userController.updateUser);
 router.get('/getAllUsers', userController.getAllUsers);
 router.get('/getUserById/:id', userController.getUserById);
 router.get('/getUsersByPage', userController.getUsersByPage);
+router.put('/changeUserPwd', userController.changePwd);
 
 // Các route cho product
 router.get('/getProductsInPage', productController.getProductsInPage);
@@ -50,6 +52,7 @@ router.post('/rateProduct', ratingController.rateProduct)
 
 //Category
 router.get('/getAllCategoryNames', productController.getAllCategoryNames)
+router.post('/addCategory', categoryController.addCategory);
 
 //Image
 // Cấu hình CloudinaryStorage
